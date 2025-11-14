@@ -4,9 +4,9 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
+    async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.orm import sessionmaker
 
 from src.app.core.config import settings
 
@@ -15,7 +15,7 @@ class PgConnector:
     def __init__(self, url: str):
         self._url = url
         self._engine: AsyncEngine | None = None
-        self._sessionmaker: sessionmaker | None = None
+        self._sessionmaker: async_sessionmaker[AsyncSession] | None = None
 
     async def connect(self) -> None:
         self._engine = create_async_engine(
@@ -23,7 +23,7 @@ class PgConnector:
             pool_pre_ping=True,
             future=True,
         )
-        self._sessionmaker = sessionmaker(
+        self._sessionmaker = async_sessionmaker(
             bind=self._engine,
             class_=AsyncSession,
             expire_on_commit=False,

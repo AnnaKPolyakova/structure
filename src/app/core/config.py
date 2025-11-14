@@ -14,7 +14,7 @@ logging_config.dictConfig(LOGGING)
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
-class Settings(BaseSettings):  # type: ignore[misc]
+class Settings(BaseSettings):
     PROJECT_NAME: str = "name"
     APP_ENV: str = "dev"
     APP_LOG_LEVEL: str = "INFO"
