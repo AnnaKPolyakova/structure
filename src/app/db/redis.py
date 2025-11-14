@@ -1,9 +1,10 @@
-import redis   # type: ignore
-from redis.asyncio import Redis, from_url # type: ignore[import-untyped]
+import redis  # type: ignore
+from redis.asyncio import Redis, from_url  # type: ignore[import-untyped]
 
 from src.app.core.config import settings
 
 redis_client: Redis | None = None
+
 
 class RedisClient:
     def __init__(self, url: str):
@@ -29,9 +30,7 @@ class RedisClient:
             return False
 
 
-redis_url: str = (
-    "{protocol}://{host}:{port}"
-).format(
+redis_url: str = ("{protocol}://{host}:{port}").format(
     protocol=settings.REDIS_PROTOCOL,
     host=settings.REDIS_HOST,
     port=settings.REDIS_PORT,
