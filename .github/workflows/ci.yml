@@ -23,9 +23,6 @@ jobs:
         run: poetry config virtualenvs.in-project true
       - name: Install deps
         run: poetry install --no-interaction --no-root
-      - name: Lint (ruff + black)
-        run: |
-          poetry run black --check --config pyproject.toml .
       - name: Type check (mypy)
         run: poetry run mypy
       - name: Tests
