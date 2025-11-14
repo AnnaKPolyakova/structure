@@ -1,5 +1,5 @@
-import redis  # type: ignore
-from redis.asyncio import Redis, from_url  # type: ignore[import-untyped]
+import redis
+from redis.asyncio import Redis, from_url
 
 from src.app.core.config import settings
 
