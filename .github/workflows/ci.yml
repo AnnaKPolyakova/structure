@@ -23,13 +23,16 @@ jobs:
         run: poetry config virtualenvs.in-project true
       - name: Install deps
         run: poetry install --no-interaction --no-root
-      - name: Lint (ruff + black)
+      - name: Lint (ruff)
         run: |
           poetry run ruff check --config pyproject.toml .
+        continue-on-error: true
+      - name: Lint (black)
+        run: |
           poetry run black --check --config pyproject.toml .
         continue-on-error: true
       - name: Type check (mypy)
-        run: poetry run mypy src tests
+        run: poetry run mypy src tests --config pyproject.toml .
         continue-on-error: true
       - name: Tests
         run: poetry run pytest --cov=acme_app --cov-report=xml
