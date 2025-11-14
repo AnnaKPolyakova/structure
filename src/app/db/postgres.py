@@ -29,7 +29,7 @@ class PgConnector:
             expire_on_commit=False,
         )
 
-    async def session(self) -> AsyncGenerator[AsyncSession, None]:
+    async def session(self) -> AsyncGenerator[AsyncSession]:
         if self._sessionmaker is None:
             raise RuntimeError("Database is not initialized")
 
