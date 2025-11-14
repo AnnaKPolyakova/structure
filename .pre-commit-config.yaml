@@ -33,7 +33,7 @@ repos:
     hooks:
         - id: mypy
           name: mypy
-          entry: mypy src tests
+          entry: mypy
           language: system
           types: [python]
 
