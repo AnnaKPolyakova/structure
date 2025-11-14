@@ -78,7 +78,7 @@ strict = true
 warn_unused_ignores = true
 warn_redundant_casts = true
 exclude = ["build/", "dist/"]
-mypy_path = ["src"]
+mypy_path = ["src", "tests"]
 # поэтапно разрешай ошибки с помощью per-module конфигов:
 [[tool.mypy.overrides]]
 module = "tests.*"

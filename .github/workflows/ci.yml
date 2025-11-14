@@ -25,21 +25,15 @@ jobs:
         run: poetry install --no-interaction --no-root
       - name: Lint (ruff)
         run: |
-          poetry run ruff check --config pyproject.toml .
-        continue-on-error: true
+          poetry run ruff check --config pyproject.toml
       - name: Lint (black)
         run: |
           poetry run black --check --config pyproject.toml .
-        continue-on-error: true
       - name: Type check (mypy)
-        run: poetry run mypy src tests --config pyproject.toml .
-        continue-on-error: true
+        run: poetry run mypy --config-file pyproject.toml src tests
       - name: Tests
         run: poetry run pytest --cov=acme_app --cov-report=xml
-        continue-on-error: true
       - name: Security (bandit)
         run: poetry run bandit -ll -q -r src
-        continue-on-error: true
       - name: Vulnerabilities (pip-audit)
         run: poetry run pip-audit -r <(poetry export -f requirements.txt --without-hashes)
-        continue-on-error: true
