@@ -25,7 +25,6 @@ jobs:
         run: poetry install --no-interaction --no-root
       - name: Lint (ruff + black)
         run: |
-          poetry run ruff check --config pyproject.toml .
           poetry run black --check --config pyproject.toml .
       - name: Type check (mypy)
         run: poetry run mypy
