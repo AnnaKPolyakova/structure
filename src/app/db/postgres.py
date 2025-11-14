@@ -15,7 +15,7 @@ class PgConnector:
     def __init__(self, url: str):
         self._url = url
         self._engine: AsyncEngine | None = None
-        self._sessionmaker: async_sessionmaker | None = None  # type: ignore[type-arg]
+        self._sessionmaker: async_sessionmaker[AsyncSession] | None = None
 
     async def connect(self) -> None:
         self._engine = create_async_engine(
