@@ -1,15 +1,16 @@
-import redis
+from typing import Optional
+
 from redis.asyncio import Redis, from_url
 
 from src.app.core.config import settings
 
-redis_client: Redis | None = None
+redis_client: Optional[Redis] = None # type: ignore[type-arg]
 
 
 class RedisClient:
     def __init__(self, url: str):
         self.url = url
-        self._redis: Redis | None = None
+        self._redis: Optional[Redis] = None # type: ignore[type-arg]
 
     async def connect(self) -> None:
         self._redis = from_url(self.url)
@@ -18,7 +19,7 @@ class RedisClient:
         if self._redis is not None:
             await self._redis.close()
 
-    async def get_redis(self) -> redis.Redis:
+    async def get_redis(self) -> Optional[Redis]:  # type: ignore[type-arg]
         return self._redis
 
     async def ping(self) -> bool:

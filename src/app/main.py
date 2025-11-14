@@ -1,8 +1,8 @@
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from typing import Any
 
-from black import Any
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
@@ -53,7 +53,7 @@ app: FastAPI = FastAPI(
 )
 
 
-@app.get("/ping")  # type: ignore[misc]
+@app.get("/ping")
 async def ping() -> dict[str, Any]:
     result: dict[str, Any] = {}
 
