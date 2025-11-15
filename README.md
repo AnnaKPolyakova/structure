@@ -8,7 +8,7 @@
 - **Redis** (async)
 - **Pydantic Settings** для конфигурации
 - **Alembic** для миграций
-- Docker Compose для инфраструктуры (Postgres, Redis, Nginx)
+- **Docker Compose** для инфраструктуры (Postgres, Redis, Nginx)
 
 ### Структура проекта (основное)
 `
@@ -36,32 +36,13 @@ poetry install --no-root
 `
 
 ### Переменные окружения
-Проект читает `.env` (см. `wbbot/core/config.py`). Значения по умолчанию
-подставляются, но рекомендуется явно задать их:
-`env
-PROJECT_NAME=structure
-APP_ENV=dev
-APP_LOG_LEVEL=INFO
-
-# Redis
-REDIS_HOST=127.0.0.1
-REDIS_PORT=6379
-REDIS_PROTOCOL=redis
-
-# Postgres
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-POSTGRES_DB
-POSTGRES_USER
-POSTGRES_PASSWORD
-`
+Проект читает `.env` (см. `src/app/core/config.py`).
+Значения по умолчанию подставляются, но рекомендуется явно задать их, пример
+в env_example
 
 ### Запуск приложения (локально)
-`bash
-poetry run python -m src.app.main
-# или
-poetry run uvicorn src.app.main:app --host 0.0.0.0 --port 8000 --reload
-`
+
+`python3 -m src.app.__main__`
 
 После запуска:
 - Swagger UI: `http://localhost:8000/docs`
@@ -97,29 +78,20 @@ alembic upgrade head
 
 ### Запуск инфраструктуры в Docker (Postgres/Redis)
 Для локальной разработки достаточно поднять Postgres и Redis:
-`bash
-docker compose -f docker-compose-local.yml up -d
-`
-
-Переменные `.env` должны содержать порты `POSTGRES_PORT` и `REDIS_PORT`,
-чтобы пробросы в compose совпали с локальными настройками клиента.
-
+`docker compose -f docker-compose-local.yml up -d`
 
 ### Тесты
-`bash
-run pytest -q
-`
+`pytest`
 
 ### Линтеры и форматирование
-`bash
-poetry run flake8
-poetry run isort .
-poetry run black .
-`
+`black src test`
+`mypy src tests`
+`ruff check`
 
 ### Полезные ссылки по коду
 - Конфигурация: `src/app/core/config.py`
-- Инициализация БД/Redis: `src/app/db/postgres.py`,
+- Инициализация БД/Redis:
+`src/app/db/postgres.py`
 `src/app/db/redis.py`
 - Приложение: `src/app/main.py`
 
