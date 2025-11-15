@@ -8,7 +8,7 @@
 - **Redis** (async)
 - **Pydantic Settings** для конфигурации
 - **Alembic** для миграций
-- Docker Compose для инфраструктуры (Postgres, Redis, Nginx)
+- **Docker Compose** для инфраструктуры (Postgres, Redis, Nginx)
 
 ### Структура проекта (основное)
 `
@@ -42,8 +42,7 @@ poetry install --no-root
 
 ### Запуск приложения (локально)
 
-`python3 -m src.app.__main__
-`
+`python3 -m src.app.__main__`
 
 После запуска:
 - Swagger UI: `http://localhost:8000/docs`
@@ -79,29 +78,20 @@ alembic upgrade head
 
 ### Запуск инфраструктуры в Docker (Postgres/Redis)
 Для локальной разработки достаточно поднять Postgres и Redis:
-`bash
-docker compose -f docker-compose-local.yml up -d
-`
-
-Переменные `.env` должны содержать порты `POSTGRES_PORT` и `REDIS_PORT`,
-чтобы пробросы в compose совпали с локальными настройками клиента.
-
+`docker compose -f docker-compose-local.yml up -d`
 
 ### Тесты
-`bash
-run pytest -q
-`
+`pytest`
 
 ### Линтеры и форматирование
-`bash
-poetry run flake8
-poetry run isort .
-poetry run black .
-`
+`black src test`
+`mypy src tests`
+`ruff check`
 
 ### Полезные ссылки по коду
 - Конфигурация: `src/app/core/config.py`
-- Инициализация БД/Redis: `src/app/db/postgres.py`,
+- Инициализация БД/Redis:
+`src/app/db/postgres.py`
 `src/app/db/redis.py`
 - Приложение: `src/app/main.py`
 
