@@ -1,0 +1,39 @@
+name: ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Configure Poetry
+        run: poetry config virtualenvs.in-project true
+      - name: Install deps
+        run: poetry install --no-interaction --no-root
+      - name: Lint (ruff)
+        run: |
+          poetry run ruff check --config pyproject.toml
+      - name: Lint (black)
+        run: |
+          poetry run black --check --config pyproject.toml .
+      - name: Type check (mypy)
+        run: poetry run mypy --config-file pyproject.toml src tests
+      - name: Tests
+        run: poetry run pytest --cov=acme_app --cov-report=xml
+      - name: Security (bandit)
+        run: poetry run bandit -ll -q -r src
+      - name: Vulnerabilities (pip-audit)
+        run: poetry run pip-audit -r <(poetry export -f requirements.txt --without-hashes)
