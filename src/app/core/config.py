@@ -17,6 +17,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 class Settings(BaseSettings):
     PROJECT_NAME: str = "name"
     APP_ENV: str = "dev"
+    APP_PORT: int = 8000
+    APP_HOST: str = "127.0.0.1"
     APP_LOG_LEVEL: str = "INFO"
     REDIS_HOST: str = "127.0.0.1"
     REDIS_PORT: int = 6376
