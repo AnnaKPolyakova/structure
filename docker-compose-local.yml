@@ -29,6 +29,7 @@ services:
     networks:
       - structure_network
 
+# при необходимости использования - раскомментировать
 #  celery:
 #    container_name: structure_celery
 #    env_file:
