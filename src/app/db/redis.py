@@ -39,7 +39,7 @@ redis_provider: RedisClient | None = None
 
 
 def get_redis_provider(test: bool = False) -> RedisClient:
-    global redis_provider # noqa: PLW0603
+    global redis_provider  # noqa: PLW0603
     if test:
         redis_provider = RedisClient(settings.REDIS_TEST_URL)
     else:
