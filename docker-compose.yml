@@ -26,8 +26,6 @@ services:
     command: --port 6379
     ports:
     - ${REDIS_PORT}:6379
-    expose:
-    - 6379
     networks:
       - structure_network
 

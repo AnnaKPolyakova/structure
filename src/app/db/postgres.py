@@ -1,3 +1,4 @@
+import logging
 from collections.abc import AsyncGenerator
 
 from sqlalchemy import text
@@ -10,31 +11,32 @@ from sqlalchemy.ext.asyncio import (
 
 from src.app.core.config import settings
 
+logger = logging.getLogger(__name__)
+
 
 class PgConnector:
-    def __init__(self, url: str):
+    def __init__(self, url: str, autoflush: bool = True):
         self._url = url
         self._engine: AsyncEngine | None = None
         self._sessionmaker: async_sessionmaker[AsyncSession] | None = None
+        self._autoflush = autoflush
 
     async def connect(self) -> None:
-        self._engine = create_async_engine(
-            self._url,
-            pool_pre_ping=True,
-            future=True,
-        )
-        self._sessionmaker = async_sessionmaker(
-            bind=self._engine,
-            class_=AsyncSession,
-            expire_on_commit=False,
-        )
-
-    async def session(self) -> AsyncGenerator[AsyncSession]:
-        if self._sessionmaker is None:
-            raise RuntimeError("Database is not initialized")
-
-        async with self._sessionmaker() as session:
-            yield session
+        try:
+            self._engine = create_async_engine(
+                self._url,
+                pool_pre_ping=True,
+                future=True,
+            )
+            self._sessionmaker = async_sessionmaker(
+                bind=self._engine,
+                class_=AsyncSession,
+                expire_on_commit=False,
+                autoflush=self._autoflush,
+            )
+            logger.info("Postgres initialized")
+        except Exception as e:
+            logger.exception("Postgres init failed: %s", e)
 
     async def ping(self) -> bool | None:
         if self._engine is None:
@@ -48,19 +50,23 @@ class PgConnector:
 
     async def close(self) -> None:
         if self._engine is not None:
-            await self._engine.dispose()
-            self._engine = None
-            self._sessionmaker = None
+            try:
+                await self._engine.dispose()
+            except Exception:
+                logger.exception("Error during Postgres shutdown")
 
 
-postgres_url: str = (
-    "postgresql+asyncpg://{user}:{password}@{host}:{port}/{db}"
-).format(
-    user=settings.POSTGRES_USER,
-    password=settings.POSTGRES_PASSWORD,
-    host=settings.POSTGRES_HOST,
-    port=settings.POSTGRES_PORT,
-    db=settings.POSTGRES_DB,
-)
+postgres_provider: PgConnector | None = None
 
-postgres_provider: PgConnector = PgConnector(postgres_url)
+
+def get_postgres_provider(test: bool = False) -> PgConnector:
+    global postgres_provider  # noqa: PLW0603
+    if test:
+        postgres_provider = PgConnector(url=settings.POSTGRES_TEST_URL)
+    else:
+        postgres_provider = PgConnector(url=settings.POSTGRES_URL)
+    return postgres_provider
+
+
+async def get_db() -> AsyncGenerator[PgConnector | None]:
+    yield postgres_provider

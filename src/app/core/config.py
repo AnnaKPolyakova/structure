@@ -21,12 +21,71 @@ class Settings(BaseSettings):
     REDIS_HOST: str = "127.0.0.1"
     REDIS_PORT: int = 6376
     REDIS_PROTOCOL: str = "redis"
+    REDIS_PASSWORD: str = "redis"
+    REDIS_DB: str = "0"
+    REDIS_TEST_DB: str = "15"
 
     POSTGRES_PASSWORD: str = "password"
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
     POSTGRES_DB: str = "database"
     POSTGRES_USER: str = "user"
+
+    @property
+    def AUTOFLUSH(self) -> bool:
+        return True
+
+    @property
+    def AUTOFLUSH_TEST(self) -> bool:
+        return False
+
+    @property
+    def POSTGRES_URL(self) -> str:
+        return (
+            "postgresql+asyncpg://{user}:{password}@{host}:{port}/{db}"
+        ).format(
+            user=self.POSTGRES_USER,
+            password=self.POSTGRES_PASSWORD,
+            host=self.POSTGRES_HOST,
+            port=self.POSTGRES_PORT,
+            db=self.POSTGRES_DB,
+        )
+
+    @property
+    def REDIS_URL(self) -> str:
+        return "{protocol}://:{password}@{host}:{port}/{bd}".format(
+            protocol=self.REDIS_PROTOCOL,
+            host=self.REDIS_HOST,
+            port=self.REDIS_PORT,
+            password=self.REDIS_PASSWORD,
+            bd=self.REDIS_DB,
+        )
+
+    @property
+    def POSTGRES_TEST_DB(self) -> str:
+        return self.POSTGRES_DB + "_test"
+
+    @property
+    def POSTGRES_TEST_URL(self) -> str:
+        return (
+            "postgresql+asyncpg://{user}:{password}@{host}:{port}/{db}"
+        ).format(
+            user=self.POSTGRES_USER,
+            password=self.POSTGRES_PASSWORD,
+            host=self.POSTGRES_HOST,
+            port=self.POSTGRES_PORT,
+            db=self.POSTGRES_TEST_DB,
+        )
+
+    @property
+    def REDIS_TEST_URL(self) -> str:
+        return "{protocol}://:{password}@{host}:{port}/{db}".format(
+            protocol=self.REDIS_PROTOCOL,
+            host=self.REDIS_HOST,
+            port=self.REDIS_PORT,
+            db=self.REDIS_TEST_DB,
+            password=self.REDIS_PASSWORD,
+        )
 
     class Config:
         env_file = os.path.join(BASE_DIR, ".env")

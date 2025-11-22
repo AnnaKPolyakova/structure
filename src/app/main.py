@@ -1,78 +1,51 @@
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Any
 
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
+from src.app.api.ping import ping_router
 from src.app.core.config import settings
-from src.app.db.postgres import postgres_provider
-from src.app.db.redis import redis_provider
+from src.app.db.postgres import get_postgres_provider
+from src.app.db.redis import get_redis_provider
 
 logging.basicConfig(level=settings.APP_LOG_LEVEL)
 logger = logging.getLogger(__name__)
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    # ---------- STARTUP ----------
-
-    # Postgres init
-    try:
-        await postgres_provider.connect()
-        logger.info("Postgres initialized")
-    except Exception as e:
-        logger.exception("Postgres init failed: %s", e)
-
-    # Redis init
-    await redis_provider.connect()
-    await redis_provider.ping()
-    logger.info("Redis initialized")
-    yield
-
-    # ---------- SHUTDOWN ----------
-    try:
-        await postgres_provider.close()
-        logger.info("Postgres closed")
-    except Exception:
-        logger.exception("Error during Postgres shutdown")
-
-    if redis_provider.get_redis() is not None:
-        await redis_provider.disconnect()
-        logger.info("Redis closed")
+routers = [
+    ping_router,
+]
 
 
-app: FastAPI = FastAPI(
-    title=settings.PROJECT_NAME,
-    docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_url="/openapi.json",
-    default_response_class=ORJSONResponse,
-    lifespan=lifespan,
-)
+def create_app(test: bool) -> FastAPI:
+    postgres_pr = get_postgres_provider(test=test)
+    redis_pr = get_redis_provider(test=test)
 
+    @asynccontextmanager
+    async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        # ---------- STARTUP ----------
+        # Postgres init
+        await postgres_pr.connect()
 
-@app.get("/ping")
-async def ping() -> dict[str, Any]:
-    result: dict[str, Any] = {}
+        # Redis init
+        await redis_pr.connect()
+        yield
 
-    # Redis
-    try:
-        if await redis_provider.ping():
-            result["redis_ping"] = "pong"
-        else:
-            result["redis_ping"] = "fail"
-    except Exception as e:
-        result["redis_error"] = str(e)
+        # ---------- SHUTDOWN ----------
+        await postgres_pr.close()
+        await redis_pr.disconnect()
 
-    # Postgres
-    try:
-        if await postgres_provider.ping():
-            result["postgres_ping"] = "pong"
-        else:
-            result["postgres_ping"] = "fail"
-    except Exception as e:
-        result["postgres_error"] = str(e)
-
-    return result
+    app: FastAPI = FastAPI(
+        title=settings.PROJECT_NAME,
+        docs_url="/docs",
+        redoc_url="/redoc",
+        openapi_url="/openapi.json",
+        default_response_class=ORJSONResponse,
+        lifespan=lifespan,
+    )
+    # ---------- State ----------
+    app.state.testing = test  # флаг тестового режима
+    for router in routers:
+        app.include_router(router)
+    return app
